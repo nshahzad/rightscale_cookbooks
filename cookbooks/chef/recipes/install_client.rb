@@ -8,6 +8,14 @@
 
 rightscale_marker :begin
 
+if node[:chef][:client][:node_name] == ""
+	node_name = node[:fqdn]
+else
+	ip = node[:ipaddress].split('.')
+	node_name = "#{node[:chef][:client][:roles]}-#{node[:chef][:client][:node_name]}-#{ip[2]}#{ip[3]}"
+end
+
+
 # Copy Chef Client installation script from cookbook files.
 # Sourced from https://www.opscode.com/chef/install.sh
 cookbook_file "/tmp/install.sh" do
@@ -36,7 +44,7 @@ template "#{node[:chef][:client][:config_dir]}/client.rb" do
   variables(
     :server_url => node[:chef][:client][:server_url],
     :validation_name => node[:chef][:client][:validation_name],
-    :node_name => node[:chef][:client][:node_name]
+    :node_name => node_name
   )
 end
 
@@ -58,7 +66,7 @@ template "#{node[:chef][:client][:config_dir]}/runlist.json" do
   mode "0440"
   backup false
   variables(
-    :node_name => node[:chef][:client][:node_name],
+    :node_name => node_name,
     :environment => node[:chef][:client][:environment],
     :company => node[:chef][:client][:company],
     :roles => node[:chef][:client][:roles]
@@ -71,7 +79,7 @@ node[:chef][:client][:current_roles] = node[:chef][:client][:roles]
 log "  Chef Client configuration is completed."
 
 # Sets command extensions and attributes.
-extension = "-j #{node[:chef][:client][:config_dir]}/runlist.json -E #{node[:chef][:client][:environment]}"
+extension = "-N #{node_name} -j #{node[:chef][:client][:config_dir]}/runlist.json -E #{node[:chef][:client][:environment]}"
 extension << " -o #{node[:chef][:client][:json_attributes]}" \
   unless node[:chef][:client][:json_attributes].empty?
 
