@@ -8,13 +8,15 @@
 
 rightscale_marker :begin
 
-if node[:chef][:client][:node_name] == ""
-	node_name = node[:fqdn]
-else
-	ip = node[:ipaddress].split('.')
-	node_name = "#{node[:chef][:client][:roles]}-#{node[:chef][:client][:node_name]}-#{ip[2]}#{ip[3]}"
-end
+#if node[:chef][:client][:node_name] == ""
+	#node_name = node[:fqdn]
+#else
+	#ip = node[:ipaddress].split('.')
+	#node_name = "#{node[:chef][:client][:roles]}-#{node[:chef][:client][:node_name]}-#{ip[2]}#{ip[3]}"
+#end
 
+ip = node[:ipaddress].split('.')
+node_name = "#{node[:chef][:client][:roles]}-#{node[:chef][:client][:node_name]}-#{ip[2]}#{ip[3]}"
 
 # Copy Chef Client installation script from cookbook files.
 # Sourced from https://www.opscode.com/chef/install.sh
